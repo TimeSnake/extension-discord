@@ -1,0 +1,6 @@
+main: de.timesnake.extension.discord.main.ExDiscord
+version: 1.0
+name: extension-discord
+author: Jonas
+depend: [basic-proxy]
+api-version: 1.13
