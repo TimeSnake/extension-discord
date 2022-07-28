@@ -2,23 +2,22 @@ package de.timesnake.extension.discord.main;
 
 import de.timesnake.basic.proxy.util.Network;
 import de.timesnake.basic.proxy.util.chat.Argument;
-import de.timesnake.basic.proxy.util.chat.ChatColor;
+import de.timesnake.basic.proxy.util.chat.Chat;
+import de.timesnake.basic.proxy.util.chat.NamedTextColor;
 import de.timesnake.basic.proxy.util.chat.Sender;
 import de.timesnake.basic.proxy.util.user.User;
 import de.timesnake.database.util.Database;
 import de.timesnake.extension.discord.wrapper.ExPrivateChannel;
 import de.timesnake.extension.discord.wrapper.ExUser;
 import de.timesnake.library.basic.util.Tuple;
-import de.timesnake.library.extension.util.chat.Chat;
 import de.timesnake.library.extension.util.cmd.Arguments;
 import de.timesnake.library.extension.util.cmd.CommandListener;
 import de.timesnake.library.extension.util.cmd.ExCommand;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.hover.content.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -37,7 +36,7 @@ public class Registration extends ListenerAdapter implements CommandListener<Sen
 
     // Singleton setup /////////////////////////////
     protected static Registration instance;
-    private HashMap<UUID, Tuple<UUID, String>> openRegistrationsByUUID = new HashMap<>();
+    private final HashMap<UUID, Tuple<UUID, String>> openRegistrationsByUUID = new HashMap<>();
 
     protected Registration() {
 
@@ -59,17 +58,18 @@ public class Registration extends ListenerAdapter implements CommandListener<Sen
         // Discord information
         if (args.length() == 0) {
 
-            TextComponent text = new TextComponent();
-            text.setText(Chat.getSenderPlugin(Plugin.DISCORD) + ChatColor.PUBLIC + "Join our discord: " + ChatColor.VALUE + "https://discord.gg/YRCZhFVE9z");
-            text.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click to open link")));
-            text.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/YRCZhFVE9z"));
+            Component component = de.timesnake.basic.proxy.util.chat.Chat.getSenderPlugin(Plugin.DISCORD)
+                    .append(Component.text("Join our discord: ").color(NamedTextColor.PUBLIC))
+                    .append(Component.text("https://discord.gg/YRCZhFVE9z").color(NamedTextColor.VALUE))
+                    .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT, Component.text("Click to open link")))
+                    .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/YRCZhFVE9z"));
 
             if (sender.hasPermission("exsupport.discord")) {
                 for (User u : Network.getUsers()) {
-                    u.getPlayer().sendMessage(text);
+                    u.getPlayer().sendMessage(component);
                 }
             } else {
-                user.getPlayer().sendMessage(text);
+                user.getPlayer().sendMessage(component);
             }
             return;
         }
@@ -80,8 +80,8 @@ public class Registration extends ListenerAdapter implements CommandListener<Sen
 
                 Long currentDiscordID = Database.getUsers().getUser(user.getUniqueId()).getDiscordId();
                 if (currentDiscordID != null) {
-                    sender.sendPluginMessage(ChatColor.WARNING + "Your account is already linked. By continuing, you " +
-                            "will unlink your current discord account.");
+                    sender.sendPluginMessage(Component.text("Your account is already linked. By continuing, you " +
+                            "will unlink your current discord account.").color(NamedTextColor.WARNING));
                 }
 
                 String code;
@@ -93,13 +93,14 @@ public class Registration extends ListenerAdapter implements CommandListener<Sen
                     openRegistrationsByUUID.put(user.getUniqueId(), new Tuple<>(user.getUniqueId(), code));
                 }
 
-                TextComponent text = new TextComponent();
-                text.setText(Chat.getSenderPlugin(Plugin.DISCORD) + ChatColor.PERSONAL + "Please send the following " +
-                        "code via private message to our bot: " + ChatColor.VALUE + code);
-                text.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click to copy")));
-                text.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, code));
+                Component component = Chat.getSenderPlugin(Plugin.DISCORD)
+                        .append(Component.text("Please send the following ").color(NamedTextColor.PERSONAL))
+                        .append(Component.text("code via private message to our bot: ").color(NamedTextColor.PERSONAL))
+                        .append(Component.text(code).color(NamedTextColor.VALUE))
+                        .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT, Component.text("Click to copy")))
+                        .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, code));
 
-                user.getPlayer().sendMessage(text);
+                user.getPlayer().sendMessage(component);
 
             } else if (args.get(0).equalsIgnoreCase("help")) {
                 sender.sendMessageCommandHelp("Get the link to our discord", "discord");
