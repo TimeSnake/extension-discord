@@ -9,7 +9,7 @@ public class ConfigFile extends ExFile {
     private Long fallbackChannel;
 
     public ConfigFile() {
-        super("extension-discord", "config");
+        super("extension-discord", "config.toml");
     }
 
     public String getToken() {

@@ -13,15 +13,6 @@ import java.util.List;
 
 public class TimeSnakeGuild {
 
-    private JDA api;
-    private long guildID;
-
-    protected static TimeSnakeGuild instance;
-
-    protected TimeSnakeGuild() {
-
-    }
-
     private static TimeSnakeGuild getInstance() {
         if (instance == null) {
             instance = new TimeSnakeGuild();
@@ -67,7 +58,7 @@ public class TimeSnakeGuild {
     }
 
     public static boolean moveVoiceMember(ExMember member, ExVoiceChannel vc) {
-        return getInstance()._moveVoiceMember(member, vc, false);
+        return getInstance()._moveVoiceMember(member, vc);
     }
 
     public static boolean moveVoiceMember(ExMember member, ExVoiceChannel vc, boolean async) {
@@ -84,6 +75,14 @@ public class TimeSnakeGuild {
 
     public static List<ExCategory> getCategoriesByName(String name, boolean ignoreCase) {
         return getInstance()._getCategoriesByName(name, ignoreCase);
+    }
+
+    protected static TimeSnakeGuild instance;
+    private JDA api;
+    private long guildID;
+
+    protected TimeSnakeGuild() {
+
     }
 
     private Guild getGuild() {
@@ -123,6 +122,13 @@ public class TimeSnakeGuild {
     protected ExVoiceChannel _createVoiceChannel(String name, ExCategory parent) {
         VoiceChannel vc = getGuild().createVoiceChannel(name, getApi().getCategoryById(parent.getID())).complete();
         return new ExVoiceChannel(vc);
+    }
+
+    protected boolean _moveVoiceMember(ExMember member, ExVoiceChannel vc) {
+        if (!member.exists() || !member.isInVoiceChannel()) return false;
+
+        getGuild().moveVoiceMember(getGuild().getMemberById(member.getID()), getGuild().getVoiceChannelById(vc.getID())).submit();
+        return true;
     }
 
     protected boolean _moveVoiceMember(ExMember member, ExVoiceChannel vc, boolean async) {

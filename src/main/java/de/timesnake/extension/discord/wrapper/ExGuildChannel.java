@@ -1,17 +1,19 @@
 package de.timesnake.extension.discord.wrapper;
 
 import de.timesnake.extension.discord.main.TimeSnakeGuild;
-import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.entities.GuildChannel;
-import net.dv8tion.jda.api.entities.Invite;
-import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.managers.ChannelManager;
+import net.dv8tion.jda.api.requests.restaction.ChannelAction;
 import net.dv8tion.jda.api.requests.restaction.InviteAction;
+import net.dv8tion.jda.api.requests.restaction.PermissionOverrideAction;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
+import java.util.Formatter;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -57,7 +59,7 @@ public class ExGuildChannel {
     }
 
     public void delete() {
-        getGuildChannel().delete().complete();
+        getGuildChannel().delete().submit();
     }
 
     public void delete(boolean async) {
@@ -113,24 +115,53 @@ public class ExGuildChannel {
         return getGuildChannel().getType();
     }
 
-    /* TODO
-        Alle Methoden zu Permissions wurden noch nicht implementiert!
+    @Nonnull
+    public Guild getGuild() {return getGuildChannel().getGuild();}
 
-        getGuild()
-        getPermissionOverride(...)
-        getPermissionOverrides()
-        getMemberPermissionOverrides()
-        getRolePermissionOverrides()
-        isSynced()
-        createCopy() -> Umständlich umzusetzen, könnte man sich ansehen
-        createPermissionOverride(...)
-        putPermissionOverride(...)
-        upsertPermissionOverride(...)
-        getJDA()
-        getId()
-        getIdLong()
-        formatTo()
-        compareTo()
-     */
+    @Nullable
+    public PermissionOverride getPermissionOverride(@NotNull IPermissionHolder iPermissionHolder) {return getGuildChannel().getPermissionOverride(iPermissionHolder);}
+
+    @Nonnull
+    public List<PermissionOverride> getPermissionOverrides() {return getGuildChannel().getPermissionOverrides();}
+
+    @Nonnull
+    public List<PermissionOverride> getMemberPermissionOverrides() {return getGuildChannel().getMemberPermissionOverrides();}
+
+    @Nonnull
+    public List<PermissionOverride> getRolePermissionOverrides() {return getGuildChannel().getRolePermissionOverrides();}
+
+    public boolean isSynced() {return getGuildChannel().isSynced();}
+
+    @CheckReturnValue
+    @Nonnull
+    public ChannelAction<? extends GuildChannel> createCopy(@NotNull Guild guild) {return getGuildChannel().createCopy(guild);}
+
+    @CheckReturnValue
+    @Nonnull
+    public ChannelAction<? extends GuildChannel> createCopy() {return getGuildChannel().createCopy();}
+
+    @CheckReturnValue
+    @Nonnull
+    public PermissionOverrideAction createPermissionOverride(@NotNull IPermissionHolder iPermissionHolder) {return getGuildChannel().createPermissionOverride(iPermissionHolder);}
+
+    @CheckReturnValue
+    @Nonnull
+    public PermissionOverrideAction putPermissionOverride(@NotNull IPermissionHolder iPermissionHolder) {return getGuildChannel().putPermissionOverride(iPermissionHolder);}
+
+    @CheckReturnValue
+    @Nonnull
+    public PermissionOverrideAction upsertPermissionOverride(@NotNull IPermissionHolder permissionHolder) {return getGuildChannel().upsertPermissionOverride(permissionHolder);}
+
+    @Nonnull
+    public JDA getJDA() {return getGuildChannel().getJDA();}
+
+    @Nonnull
+    public String getId() {return getGuildChannel().getId();}
+
+    public long getIdLong() {return getGuildChannel().getIdLong();}
+
+    public void formatTo(Formatter formatter, int flags, int width, int precision) {getGuildChannel().formatTo(formatter, flags, width, precision);}
+
+    public int compareTo(@NotNull GuildChannel o) {return getGuildChannel().compareTo(o);}
 
 }
