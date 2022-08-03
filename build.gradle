@@ -28,8 +28,8 @@ repositories {
 }
 
 dependencies {
-    implementation('club.minnced:opus-java:1.1.1')
-    implementation('net.dv8tion:JDA:4.4.0_352')
+    implementation 'club.minnced:opus-java:1.1.1'
+    implementation 'net.dv8tion:JDA:4.4.0_352'
     implementation 'ch.qos.logback:logback-classic:1.2.10'
     compileOnly 'de.timesnake:basic-proxy:1.0-SNAPSHOT'
     compileOnly 'de.timesnake:channel-proxy:1.0-SNAPSHOT'

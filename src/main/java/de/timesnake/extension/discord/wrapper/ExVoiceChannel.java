@@ -19,7 +19,7 @@ public class ExVoiceChannel extends ExGuildChannel {
         super(channel);
     }
 
-    protected VoiceChannel getVoiceChannel() {
+    public VoiceChannel getVoiceChannel() {
         return TimeSnakeGuild.getApi().getGuildById(TimeSnakeGuild.getGuildID()).getVoiceChannelById(channelID);
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
