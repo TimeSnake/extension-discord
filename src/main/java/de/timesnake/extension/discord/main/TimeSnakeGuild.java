@@ -127,7 +127,7 @@ public class TimeSnakeGuild {
     protected boolean _moveVoiceMember(ExMember member, ExVoiceChannel vc) {
         if (!member.exists() || !member.isInVoiceChannel()) return false;
 
-        getGuild().moveVoiceMember(getGuild().getMemberById(member.getID()), getGuild().getVoiceChannelById(vc.getID())).submit();
+        getGuild().moveVoiceMember(getGuild().getMemberById(member.getID()), getGuild().getVoiceChannelById(vc.getID())).queue();
         return true;
     }
 
