@@ -2,14 +2,14 @@ package de.timesnake.extension.discord.main;
 
 import de.timesnake.basic.proxy.util.Network;
 import de.timesnake.basic.proxy.util.chat.Argument;
-import de.timesnake.basic.proxy.util.chat.Chat;
-import de.timesnake.basic.proxy.util.chat.NamedTextColor;
 import de.timesnake.basic.proxy.util.chat.Sender;
 import de.timesnake.basic.proxy.util.user.User;
 import de.timesnake.database.util.Database;
 import de.timesnake.extension.discord.wrapper.ExPrivateChannel;
 import de.timesnake.extension.discord.wrapper.ExUser;
 import de.timesnake.library.basic.util.Tuple;
+import de.timesnake.library.basic.util.chat.ExTextColor;
+import de.timesnake.library.extension.util.chat.Chat;
 import de.timesnake.library.extension.util.cmd.Arguments;
 import de.timesnake.library.extension.util.cmd.CommandListener;
 import de.timesnake.library.extension.util.cmd.ExCommand;
@@ -58,13 +58,13 @@ public class Registration extends ListenerAdapter implements CommandListener<Sen
         // Discord information
         if (args.length() == 0) {
 
-            Component component = de.timesnake.basic.proxy.util.chat.Chat.getSenderPlugin(Plugin.DISCORD)
-                    .append(Component.text("Join our discord: ").color(NamedTextColor.PUBLIC))
-                    .append(Component.text("https://discord.gg/YRCZhFVE9z").color(NamedTextColor.VALUE))
+            Component component = Chat.getSenderPlugin(Plugin.DISCORD)
+                    .append(Component.text("Join our discord: ", ExTextColor.PUBLIC))
+                    .append(Component.text("https://discord.gg/YRCZhFVE9z", ExTextColor.VALUE))
                     .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT, Component.text("Click to open link")))
                     .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/YRCZhFVE9z"));
 
-            if (sender.hasPermission("exsupport.discord")) {
+            if (sender.hasPermission("discord.info")) {
                 for (User u : Network.getUsers()) {
                     u.getPlayer().sendMessage(component);
                 }
@@ -81,7 +81,7 @@ public class Registration extends ListenerAdapter implements CommandListener<Sen
                 Long currentDiscordID = Database.getUsers().getUser(user.getUniqueId()).getDiscordId();
                 if (currentDiscordID != null) {
                     sender.sendPluginMessage(Component.text("Your account is already linked. By continuing, you " +
-                            "will unlink your current discord account.").color(NamedTextColor.WARNING));
+                            "will unlink your current discord account.", ExTextColor.WARNING));
                 }
 
                 String code;
@@ -94,14 +94,19 @@ public class Registration extends ListenerAdapter implements CommandListener<Sen
                 }
 
                 Component component = Chat.getSenderPlugin(Plugin.DISCORD)
-                        .append(Component.text("Please send the following ").color(NamedTextColor.PERSONAL))
-                        .append(Component.text("code via private message to our bot: ").color(NamedTextColor.PERSONAL))
-                        .append(Component.text(code).color(NamedTextColor.VALUE))
+                        .append(Component.text("Please send the following ", ExTextColor.PERSONAL))
+                        .append(Component.text("code via private message to our bot: ", ExTextColor.PERSONAL))
+                        .append(Component.text(code, ExTextColor.VALUE))
                         .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT, Component.text("Click to copy")))
                         .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, code));
 
                 user.getPlayer().sendMessage(component);
 
+            } else if (args.get(0).equalsIgnoreCase("ping")) {
+                if (!sender.hasPermission("discord.ping")) {
+                    return;
+                }
+                TimeSnakeGuild.getApi().getCategoriesByName("Kanäle", true).get(0).getTextChannels().stream().filter(t -> t.getName().equalsIgnoreCase("allgemein")).findFirst().get().sendMessage("@ping-vanilla Server is online");
             } else if (args.get(0).equalsIgnoreCase("help")) {
                 sender.sendMessageCommandHelp("Get the link to our discord", "discord");
                 sender.sendMessageCommandHelp("Register your discord account", "discord login");
