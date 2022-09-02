@@ -11,7 +11,7 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven {
-        url = uri('https://papermc.io/repo/repository/maven-public/')
+        url = uri 'https://papermc.io/repo/repository/maven-public/'
     }
 
     maven {
@@ -23,7 +23,7 @@ repositories {
     }
 
     maven {
-        url = uri('https://repo.maven.apache.org/maven2/')
+        url = uri 'https://repo.maven.apache.org/maven2/'
     }
 }
 
@@ -31,13 +31,18 @@ dependencies {
     implementation 'club.minnced:opus-java:1.1.1'
     implementation 'net.dv8tion:JDA:4.4.0_352'
     implementation 'ch.qos.logback:logback-classic:1.2.10'
+
     compileOnly 'de.timesnake:basic-proxy:1.0-SNAPSHOT'
-    compileOnly 'de.timesnake:channel-proxy:1.0-SNAPSHOT'
-    compileOnly 'de.timesnake:channel-api:1.0-SNAPSHOT'
+
     compileOnly 'de.timesnake:database-proxy:1.0-SNAPSHOT'
     compileOnly 'de.timesnake:database-api:1.0-SNAPSHOT'
-    compileOnly 'de.timesnake:library-basic:1.0-SNAPSHOT'
+
+    compileOnly 'de.timesnake:channel-proxy:1.0-SNAPSHOT'
+    compileOnly 'de.timesnake:channel-api:1.0-SNAPSHOT'
+
     compileOnly 'de.timesnake:library-extension:1.0-SNAPSHOT'
+    compileOnly 'de.timesnake:library-basic:1.0-SNAPSHOT'
+
     compileOnly 'com.velocitypowered:velocity-api:3.1.1'
     annotationProcessor 'com.velocitypowered:velocity-api:3.1.1'
 }
