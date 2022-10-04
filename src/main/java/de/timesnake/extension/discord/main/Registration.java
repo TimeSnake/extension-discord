@@ -161,4 +161,9 @@ public class Registration extends ListenerAdapter implements CommandListener<Sen
         }
         return List.of();
     }
+
+    @Override
+    public void loadCodes(de.timesnake.library.extension.util.chat.Plugin plugin) {
+
+    }
 }
