@@ -48,3 +48,7 @@ The extension will:
 
 All users currently connected to a deleted channel are sent to a fallback channel specified in the config file (coming
 soon).
+
+## License
+
+- The source is licensed under the GNU GPLv2 license that can be found in the [LICENSE](LICENSE) file.
