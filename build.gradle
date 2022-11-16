@@ -41,7 +41,6 @@ archivesBaseName = 'extension-discord'
 
 task buildFatJar(type: Jar) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    baseName = archivesBaseName
     classifier = "all"
     from { configurations.runtimeClasspath.findAll { !it.name.endsWith('pom') }.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
