@@ -1,5 +1,5 @@
 /*
- * extension-discord.main
+ * workspace.extension-discord.main
  * Copyright (C) 2022 timesnake
  *
  * This program is free software; you can redistribute it and/or
@@ -82,13 +82,12 @@ public class ChannelManager implements ChannelListener {
                         for (UUID uuid : entry.getValue()) {
                             Member member = TimeSnakeGuild.getMemberByUuid(uuid);
                             if (member != null && member.getVoiceState().inVoiceChannel()
-                                    && !member.getVoiceState().getChannel().equals(v)) {
+                                && !member.getVoiceState().getChannel().equals(v)) {
                                 this.moveVoiceMember(member, v);
                                 sb.append("#");
                             }
                             sb.append(Network.getUser(uuid).getName()).append(", ");
                         }
-                        System.out.println(entry.getKey() + ": " + sb);
                     }
             );
 
