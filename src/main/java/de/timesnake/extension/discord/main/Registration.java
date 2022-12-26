@@ -1,19 +1,5 @@
 /*
- * extension-discord.main
  * Copyright (C) 2022 timesnake
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http://www.gnu.org/licenses/>.
  */
 
 package de.timesnake.extension.discord.main;
@@ -31,17 +17,16 @@ import de.timesnake.library.extension.util.chat.Chat;
 import de.timesnake.library.extension.util.cmd.Arguments;
 import de.timesnake.library.extension.util.cmd.CommandListener;
 import de.timesnake.library.extension.util.cmd.ExCommand;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
 
 public class Registration extends ListenerAdapter implements CommandListener<Sender, Argument> {
 

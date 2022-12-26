@@ -1,24 +1,17 @@
 /*
- * extension-discord.main
  * Copyright (C) 2022 timesnake
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http://www.gnu.org/licenses/>.
  */
 
 package de.timesnake.extension.discord.wrapper;
 
 import de.timesnake.extension.discord.main.TimeSnakeGuild;
+import java.awt.Color;
+import java.time.OffsetDateTime;
+import java.util.EnumSet;
+import java.util.List;
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.dv8tion.jda.annotations.Incubating;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
@@ -26,14 +19,6 @@ import net.dv8tion.jda.api.entities.ClientType;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import org.jetbrains.annotations.NotNull;
-
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.awt.*;
-import java.time.OffsetDateTime;
-import java.util.EnumSet;
-import java.util.List;
 
 public class ExMember {
 

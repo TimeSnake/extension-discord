@@ -1,39 +1,30 @@
 /*
- * extension-discord.main
  * Copyright (C) 2022 timesnake
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http://www.gnu.org/licenses/>.
  */
 
 package de.timesnake.extension.discord.wrapper;
 
 import de.timesnake.extension.discord.main.TimeSnakeGuild;
+import java.time.OffsetDateTime;
+import java.util.Formatter;
+import java.util.LinkedList;
+import java.util.List;
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.GuildChannel;
+import net.dv8tion.jda.api.entities.IPermissionHolder;
+import net.dv8tion.jda.api.entities.Invite;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.PermissionOverride;
 import net.dv8tion.jda.api.managers.ChannelManager;
 import net.dv8tion.jda.api.requests.restaction.ChannelAction;
 import net.dv8tion.jda.api.requests.restaction.InviteAction;
 import net.dv8tion.jda.api.requests.restaction.PermissionOverrideAction;
 import org.jetbrains.annotations.NotNull;
-
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.time.OffsetDateTime;
-import java.util.Formatter;
-import java.util.LinkedList;
-import java.util.List;
 
 public class ExGuildChannel {
 
