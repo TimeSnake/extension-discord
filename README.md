@@ -2,7 +2,6 @@
 
 This module is part of the plugin-project and won't run without
 the [root module](https://git.timesnake.de/timesnake/plugin-root-project) [1].
-[root module](https://git.timesnake.de/timesnake/plugin-root-project)
 
 ## Usage
 
@@ -58,8 +57,7 @@ The extension will:
 
 All users currently connected to a deleted channel are sent to a fallback channel specified in the
 config file (coming
-soon).
-[root module](https://git.timesnake.de/timesnake/plugin-root-project)
+soon)
 
 ## Code Style
 
