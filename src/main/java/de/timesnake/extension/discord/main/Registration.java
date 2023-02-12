@@ -12,7 +12,7 @@ import de.timesnake.database.util.Database;
 import de.timesnake.extension.discord.wrapper.ExPrivateChannel;
 import de.timesnake.extension.discord.wrapper.ExUser;
 import de.timesnake.library.basic.util.Tuple;
-import de.timesnake.library.basic.util.chat.ExTextColor;
+import de.timesnake.library.chat.ExTextColor;
 import de.timesnake.library.extension.util.chat.Chat;
 import de.timesnake.library.extension.util.cmd.Arguments;
 import de.timesnake.library.extension.util.cmd.CommandListener;
@@ -47,7 +47,8 @@ public class Registration extends ListenerAdapter implements CommandListener<Sen
     ////////////////////////////////////////////////
 
     @Override
-    public void onCommand(Sender sender, ExCommand<Sender, Argument> cmd, Arguments<Argument> args) {
+    public void onCommand(Sender sender, ExCommand<Sender, Argument> cmd,
+            Arguments<Argument> args) {
         if (!args.isLengthLowerEquals(1, true)) {
             return;
         }
@@ -64,8 +65,10 @@ public class Registration extends ListenerAdapter implements CommandListener<Sen
             Component component = Chat.getSenderPlugin(Plugin.DISCORD)
                     .append(Component.text("Join our discord: ", ExTextColor.PUBLIC))
                     .append(Component.text("https://discord.gg/YRCZhFVE9z", ExTextColor.VALUE))
-                    .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT, Component.text("Click to open link")))
-                    .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/YRCZhFVE9z"));
+                    .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT,
+                            Component.text("Click to open link")))
+                    .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL,
+                            "https://discord.gg/YRCZhFVE9z"));
 
             if (sender.hasPermission("discord.info")) {
                 for (User u : Network.getUsers()) {
@@ -81,10 +84,13 @@ public class Registration extends ListenerAdapter implements CommandListener<Sen
         if (args.length() == 1) {
             if (args.get(0).equalsIgnoreCase("login")) {
 
-                Long currentDiscordID = Database.getUsers().getUser(user.getUniqueId()).getDiscordId();
+                Long currentDiscordID = Database.getUsers().getUser(user.getUniqueId())
+                        .getDiscordId();
                 if (currentDiscordID != null) {
-                    sender.sendPluginMessage(Component.text("Your account is already linked. By continuing, you " +
-                            "will unlink your current discord account.", ExTextColor.WARNING));
+                    sender.sendPluginMessage(
+                            Component.text("Your account is already linked. By continuing, you " +
+                                            "will unlink your current discord account.",
+                                    ExTextColor.WARNING));
                 }
 
                 String code;
@@ -93,15 +99,19 @@ public class Registration extends ListenerAdapter implements CommandListener<Sen
                 } else {
                     Random rnd = new Random();
                     code = String.valueOf(rnd.nextInt(100000 - 10000) + 10000);
-                    openRegistrationsByUUID.put(user.getUniqueId(), new Tuple<>(user.getUniqueId(), code));
+                    openRegistrationsByUUID.put(user.getUniqueId(),
+                            new Tuple<>(user.getUniqueId(), code));
                 }
 
                 Component component = Chat.getSenderPlugin(Plugin.DISCORD)
                         .append(Component.text("Please send the following ", ExTextColor.PERSONAL))
-                        .append(Component.text("code via private message to our bot: ", ExTextColor.PERSONAL))
+                        .append(Component.text("code via private message to our bot: ",
+                                ExTextColor.PERSONAL))
                         .append(Component.text(code, ExTextColor.VALUE))
-                        .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT, Component.text("Click to copy")))
-                        .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, code));
+                        .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                Component.text("Click to copy")))
+                        .clickEvent(
+                                ClickEvent.clickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, code));
 
                 user.getPlayer().sendMessage(component);
 
@@ -109,10 +119,12 @@ public class Registration extends ListenerAdapter implements CommandListener<Sen
                 if (!sender.hasPermission("discord.ping")) {
                     return;
                 }
-                TimeSnakeGuild.getApi().getCategoriesByName("Kanäle", true).get(0).getTextChannels().stream().filter(t -> t.getName().equalsIgnoreCase("allgemein")).findFirst().get().sendMessage("@ping-vanilla Server is online");
+                TimeSnakeGuild.getApi().getCategoriesByName("Kanäle", true).get(0).getTextChannels()
+                        .stream().filter(t -> t.getName().equalsIgnoreCase("allgemein")).findFirst()
+                        .get().sendMessage("@ping-vanilla Server is online");
             } else if (args.get(0).equalsIgnoreCase("help")) {
-                sender.sendMessageCommandHelp("Get the link to our discord", "discord");
-                sender.sendMessageCommandHelp("Register your discord account", "discord login");
+                sender.sendTDMessageCommandHelp("Get the link to our discord", "discord");
+                sender.sendTDMessageCommandHelp("Register your discord account", "discord login");
             } else {
                 sender.sendMessageUseHelp("discord help");
             }
@@ -135,8 +147,10 @@ public class Registration extends ListenerAdapter implements CommandListener<Sen
         try {
             providedCode = String.valueOf(Integer.parseInt(message));
         } catch (NumberFormatException e) {
-            channel.sendMessage("Your message does not have the format of a registration id.\nPlease use the command " +
-                    "\"/discord login\" and copy the code by clicking on it.").complete();
+            channel.sendMessage(
+                    "Your message does not have the format of a registration id.\nPlease use the command "
+                            +
+                            "\"/discord login\" and copy the code by clicking on it.").complete();
             return;
         }
 
@@ -146,19 +160,24 @@ public class Registration extends ListenerAdapter implements CommandListener<Sen
                 long userID = user.getID();
                 Database.getUsers().getUser(uuid).setDiscordId(userID);
                 openRegistrationsByUUID.remove(uuid);
-                channel.sendMessage("Your discord account has been successfully linked to your Minecraft account (" + Database.getUsers().getUser(uuid).getName() + ")!").complete();
+                channel.sendMessage(
+                        "Your discord account has been successfully linked to your Minecraft account ("
+                                + Database.getUsers().getUser(uuid).getName() + ")!").complete();
                 return;
             }
         }
 
         // Code not found
-        channel.sendMessage("The entered code does not exist. Please use the command \"/discord login\" and follow " +
-                "the instructions.").complete();
+        channel.sendMessage(
+                "The entered code does not exist. Please use the command \"/discord login\" and follow "
+                        +
+                        "the instructions.").complete();
 
     }
 
     @Override
-    public List<String> getTabCompletion(ExCommand<Sender, Argument> cmd, Arguments<Argument> args) {
+    public List<String> getTabCompletion(ExCommand<Sender, Argument> cmd,
+            Arguments<Argument> args) {
         if (args.length() == 1) {
             return List.of("login", "help");
         }
