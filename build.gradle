@@ -30,6 +30,7 @@ dependencies {
 
     compileOnly project(':library-extension')
     compileOnly project(':library-basic')
+    compileOnly project(':library-chat')
 
     compileOnly project.velocity
     annotationProcessor project.velocity
