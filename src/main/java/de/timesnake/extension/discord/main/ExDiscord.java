@@ -72,7 +72,7 @@ public class ExDiscord {
     public void onProxyInitialization(ProxyInitializeEvent event) {
         plugin = this;
 
-        Network.getCommandHandler().addCommand(this, "discord", Registration.getInstance(),
+        Network.getCommandManager().addCommand(this, "discord", Registration.getInstance(),
                 de.timesnake.extension.discord.main.Plugin.DISCORD);
 
         new ChannelManager();
@@ -95,8 +95,9 @@ public class ExDiscord {
             api.getPresence().setPresence(Activity.watching("TimeSnake.de"), false);
 
         } else {
-            Network.printWarning(de.timesnake.extension.discord.main.Plugin.DISCORD, "The api could not be " +
-                    "initialized.");
+            Network.printWarning(de.timesnake.extension.discord.main.Plugin.DISCORD,
+                    "The api could not be " +
+                            "initialized.");
         }
     }
 
