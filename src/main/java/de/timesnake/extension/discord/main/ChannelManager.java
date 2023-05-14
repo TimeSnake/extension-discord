@@ -9,9 +9,10 @@ import de.timesnake.channel.util.listener.ChannelHandler;
 import de.timesnake.channel.util.listener.ChannelListener;
 import de.timesnake.channel.util.listener.ListenerType;
 import de.timesnake.channel.util.message.ChannelDiscordMessage;
-import de.timesnake.extension.discord.util.DatabaseUtil;
-import de.timesnake.extension.discord.wrapper.ExMember;
+import de.timesnake.channel.util.message.ChannelDiscordMessage.Allocation;
+import de.timesnake.library.basic.util.Loggers;
 import de.timesnake.library.basic.util.Tuple;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -33,65 +34,79 @@ public class ChannelManager implements ChannelListener {
     }
 
     @ChannelHandler(type = {ListenerType.DISCORD_MOVE_MEMBERS})
-    public void onMoveTeamsMessage(ChannelDiscordMessage<ChannelDiscordMessage.Allocation> message) {
+    public void onMoveTeamsMessage(ChannelDiscordMessage<Allocation> message) {
 
-        // Check if category already exists or needs to be created
-        List<Category> categories = TimeSnakeGuild.getCategoriesByName(message.getIdentifier(), false);
+        List<Category> categories = TimeSnakeGuild.getCategoriesByName(message.getIdentifier(),
+                false);
         Category category;
 
-        if (categories.size() == 0) { // Category does not exist
+        if (categories.size() == 0) {
             category = TimeSnakeGuild.createCategory(message.getIdentifier()).complete();
         } else {
-            if (categories.size() > 1) {
-                Network.printWarning(Plugin.DISCORD, "Received MOVED_TEAMS message with ambiguous identifier.", "Category: " + message.getIdentifier());
-            }
             category = categories.get(0);
         }
 
-        // Extract allocation map and create map String -> ExChannel
-        Map<String, ? extends Collection<UUID>> userAllocationByTeam = message.getValue().getAllocation();
-        Map<String, CompletableFuture<VoiceChannel>> voiceChannelByTeam = new HashMap<>();
+        Map<String, ? extends Collection<UUID>> userAllocationByTeam = message.getValue()
+                .getAllocation();
 
-        // Create voice channels (if necessary)
-        for (String teamName : userAllocationByTeam.keySet()) {
+        for (Map.Entry<String, ? extends Collection<UUID>> entry : userAllocationByTeam.entrySet()) {
+            String teamName = entry.getKey();
+            Collection<UUID> uuids = entry.getValue();
+            CompletableFuture<VoiceChannel> voiceChannel;
+
             List<VoiceChannel> voiceChannels = category.getVoiceChannels().stream().filter(v ->
                     v.getName().equals(teamName)).toList();
-            if (voiceChannels.size() == 0) { // Voice channel does not exist
-                voiceChannelByTeam.put(teamName, this.createVoiceChannel(category, teamName));
+            if (voiceChannels.size() == 0) {
+                voiceChannel = this.createVoiceChannel(category, teamName);
             } else {
-                voiceChannelByTeam.put(teamName, CompletableFuture.completedFuture(voiceChannels.get(0)));
+                voiceChannel = CompletableFuture.completedFuture(voiceChannels.get(0));
             }
-        }
 
-        // Move users
-        for (Map.Entry<String, ? extends Collection<UUID>> entry : userAllocationByTeam.entrySet()) {
-            voiceChannelByTeam.get(entry.getKey()).whenCompleteAsync(
-                    (v, t) -> {
-                        StringBuilder sb = new StringBuilder();
-                        for (UUID uuid : entry.getValue()) {
+            voiceChannel.whenCompleteAsync((v, t) -> {
+                        for (UUID uuid : uuids) {
                             Member member = TimeSnakeGuild.getMemberByUuid(uuid);
                             if (member != null && member.getVoiceState().inVoiceChannel()
-                                && !member.getVoiceState().getChannel().equals(v)) {
+                                    && !member.getVoiceState().getChannel().equals(v)) {
                                 this.moveVoiceMember(member, v);
-                                sb.append("#");
                             }
-                            sb.append(Network.getUser(uuid).getName()).append(", ");
                         }
                     }
             );
 
+            if (!uuids.isEmpty()) {
+                Loggers.DISCORD.info("Moved members to '" + teamName + "': '"
+                        + String.join("', '", uuids.stream().map(UUID::toString).toList()));
+            }
         }
     }
 
-    private void moveVoiceMember(Member member, VoiceChannel voiceChannel) {
-        if (this.awaitingMoveByMemberId.containsKey(member.getIdLong())) {
-            this.awaitingMoveByMemberId.remove(member.getIdLong()).getB().cancel(false);
+    private CompletableFuture<Void> moveVoiceMember(Member member, VoiceChannel voiceChannel) {
+        return this.moveVoiceMembers(List.of(member), voiceChannel);
+    }
+
+    private CompletableFuture<Void> moveVoiceMembers(Collection<Member> members,
+            VoiceChannel voiceChannel) {
+
+        List<CompletableFuture<Void>> futures = new ArrayList<>(members.size());
+
+        for (Member member : members) {
+            if (this.awaitingMoveByMemberId.containsKey(member.getIdLong())) {
+                this.awaitingMoveByMemberId.remove(member.getIdLong()).getB().cancel(false);
+            }
+
+            CompletableFuture<Void> future = TimeSnakeGuild.moveVoiceMember(member, voiceChannel)
+                    .submit();
+
+            this.awaitingMoveByMemberId.put(member.getIdLong(),
+                    new Tuple<>(member.getIdLong(), future));
+
+            future.whenCompleteAsync(
+                    (v, t) -> this.awaitingMoveByMemberId.remove(member.getIdLong()));
+
+            futures.add(future);
         }
 
-        TimeSnakeGuild.moveVoiceMember(member, voiceChannel);
-        this.awaitingMoveByMemberId.put(member.getIdLong(), new Tuple<>(member.getIdLong(),
-                TimeSnakeGuild.moveVoiceMember(member, voiceChannel).submit().whenCompleteAsync((v, t) ->
-                        this.awaitingMoveByMemberId.remove(member.getIdLong()))));
+        return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
     }
 
     private CompletableFuture<VoiceChannel> createVoiceChannel(Category category, String name) {
@@ -99,7 +114,6 @@ public class ChannelManager implements ChannelListener {
             this.awaitingChannelCreation.remove(name).getB().cancel(false);
         }
 
-        TimeSnakeGuild.createVoiceChannel(name);
         CompletableFuture<VoiceChannel> result = category.createVoiceChannel(name).submit();
         this.awaitingChannelCreation.put(name, new Tuple<>(name,
                 result.whenCompleteAsync((v, t) ->
@@ -115,29 +129,24 @@ public class ChannelManager implements ChannelListener {
             return;
         }
 
-        // Extract channels to delete
         List<String> teamNames = message.getValue();
 
-        if (teamNames.isEmpty()) { // Delete everything
-            List<VoiceChannel> voiceChannels = category.getVoiceChannels();
-            for (VoiceChannel vc : voiceChannels) {
-                vc.delete();
-            }
-            category.delete();
+        if (teamNames.isEmpty()) {
+            CompletableFuture.allOf(category.getVoiceChannels().stream()
+                            .map(voiceChannel -> this.moveVoiceMembers(voiceChannel.getMembers(),
+                                            TimeSnakeGuild.getFallbackChannel())
+                                    .whenCompleteAsync((v, t) -> voiceChannel.delete().submit()))
+                            .toArray(CompletableFuture[]::new))
+                    .whenCompleteAsync((v, t) -> category.delete().submit());
+            Loggers.DISCORD.info("Deleted category '" + category.getName() + "'");
         } else {
-            for (String teamName : teamNames) {
-                List<VoiceChannel> channels = category.getVoiceChannels().stream().filter(v -> v.getName().equals(teamName)).toList();
-                if (channels.isEmpty()) {
-                    Network.printWarning(Plugin.DISCORD, "Received DESTROY_TEAMS message with non-existent channel name.", "Name: " + teamName);
-                } else {
-                    if (channels.size() > 1) {
-                        Network.printWarning(Plugin.DISCORD, "Received DESTROY_TEAMS message with ambiguous channel name.", "Name: " + teamName);
-                    }
-                    for (VoiceChannel c : channels) {
-                        c.delete();
-                    }
-                }
-            }
+            category.getVoiceChannels().stream()
+                    .filter(v -> teamNames.contains(v.getName()))
+                    .forEach(voiceChannel -> this.moveVoiceMembers(voiceChannel.getMembers(),
+                                    TimeSnakeGuild.getFallbackChannel())
+                            .whenCompleteAsync((v, t) -> voiceChannel.delete().submit()));
+            Loggers.DISCORD.info("Deleted channels '" + String.join("' , '", teamNames)
+                    + "' in category '" + category.getName() + "'");
         }
     }
 
@@ -148,12 +157,15 @@ public class ChannelManager implements ChannelListener {
             return;
         }
 
-        List<VoiceChannel> voiceChannels = category.getVoiceChannels();
-        for (VoiceChannel vc : voiceChannels) {
-            if (vc.getMembers().size() == 0) {
-                vc.delete();
-            }
-        }
+        category.getVoiceChannels().stream()
+                .filter(vc -> vc.getMembers().size() == 0)
+                .forEach(voiceChannel -> this.moveVoiceMembers(voiceChannel.getMembers(),
+                                TimeSnakeGuild.getFallbackChannel())
+                        .whenCompleteAsync((v, t) -> {
+                            voiceChannel.delete().submit();
+                            Loggers.DISCORD.info("Deleted unused channel in category '"
+                                    + voiceChannel.getName() + "'");
+                        }));
     }
 
     @ChannelHandler(type = ListenerType.DISCORD_HIDE_CHANNELS)
@@ -164,11 +176,16 @@ public class ChannelManager implements ChannelListener {
         }
 
         if (msg.getValue()) {
-            category.getVoiceChannels().get(0).createPermissionOverride(category.getGuild().getPublicRole()).setDeny(Permission.VIEW_CHANNEL).queue();
+            category.getVoiceChannels().get(0)
+                    .createPermissionOverride(category.getGuild().getPublicRole())
+                    .setDeny(Permission.VIEW_CHANNEL).submit();
         } else {
-            category.getVoiceChannels().get(0).createPermissionOverride(category.getGuild().getPublicRole()).setAllow(Permission.VIEW_CHANNEL).queue();
-
+            category.getVoiceChannels().get(0)
+                    .createPermissionOverride(category.getGuild().getPublicRole())
+                    .setAllow(Permission.VIEW_CHANNEL).submit();
         }
+
+        Loggers.DISCORD.info("Hide channels in category '" + category.getName() + "'");
     }
 
     @ChannelHandler(type = ListenerType.DISCORD_MUTE_CHANNEL)
@@ -178,14 +195,18 @@ public class ChannelManager implements ChannelListener {
             return;
         }
 
-        List<VoiceChannel> channels = category.getVoiceChannels().stream().filter(v -> v.getName().equals(msg.getValue())).toList();
+        List<VoiceChannel> channels = category.getVoiceChannels().stream()
+                .filter(v -> v.getName().equals(msg.getValue())).toList();
 
         if (channels.isEmpty()) {
             return;
         }
 
-        channels.get(0).createPermissionOverride(category.getGuild().getPublicRole()).setDeny(Permission.VOICE_SPEAK).queue();
+        channels.get(0).createPermissionOverride(category.getGuild().getPublicRole())
+                .setDeny(Permission.VOICE_SPEAK).submit();
 
+        Loggers.DISCORD.info("Mute channel '" + channels.get(0).getName() + "' in category '"
+                + category.getName() + "'");
     }
 
     @ChannelHandler(type = ListenerType.DISCORD_DISCONNECT_MEMBER)
@@ -195,23 +216,20 @@ public class ChannelManager implements ChannelListener {
             return;
         }
 
-        ExMember member = DatabaseUtil.getMemberFromUUID(msg.getValue());
+        Member member = TimeSnakeGuild.getMemberByUuid(msg.getValue());
         if (member == null) {
             return;
         }
 
         TimeSnakeGuild.moveVoiceMember(member, null);
+        Loggers.DISCORD.info("Disconnected member '" + msg.getValue().toString() + "'");
     }
 
     private Category checkCategory(String name) {
         List<Category> categories = TimeSnakeGuild.getCategoriesByName(name, false);
-        if (categories.size() == 0) { // Category does not exist
-            Network.printWarning(Plugin.DISCORD, "Received DESTROY_TEAMS message with non-existent identifier.", "Category: " + name);
+        if (categories.size() == 0) {
             return null;
         } else {
-            if (categories.size() > 1) {
-                Network.printWarning(Plugin.DISCORD, "Received DESTROY_TEAMS message with ambiguous identifier.", "Category: " + name);
-            }
             return categories.get(0);
         }
     }

@@ -53,11 +53,8 @@ public class ExDiscord {
         return server.getCommandManager();
     }
 
-    private static void registerListeners(JDA api) {
-        api.addEventListener(Registration.getInstance());
-    }
-
     public static ConfigFile configFile = new ConfigFile();
+    private static RegistrationCmd registrationCmd;
     private static ExDiscord plugin;
     private static ProxyServer server;
     private static Logger logger;
@@ -72,7 +69,9 @@ public class ExDiscord {
     public void onProxyInitialization(ProxyInitializeEvent event) {
         plugin = this;
 
-        Network.getCommandManager().addCommand(this, "discord", Registration.getInstance(),
+        registrationCmd = new RegistrationCmd();
+
+        Network.getCommandManager().addCommand(this, "discord", registrationCmd,
                 de.timesnake.extension.discord.main.Plugin.DISCORD);
 
         new ChannelManager();
@@ -90,18 +89,17 @@ public class ExDiscord {
         if (api != null) {
 
             // Init
-            TimeSnakeGuild.initialize(api, configFile.getGuildID());
-            registerListeners(api);
+            new ExGuild(api, configFile.getGuildID());
+            api.addEventListener(registrationCmd);
             api.getPresence().setPresence(Activity.watching("TimeSnake.de"), false);
 
         } else {
             Network.printWarning(de.timesnake.extension.discord.main.Plugin.DISCORD,
-                    "The api could not be " +
-                            "initialized.");
+                    "The api could not be initialized.");
         }
     }
 
     public void onProxyShutdown(ProxyShutdownEvent event) {
-        TimeSnakeGuild.getApi().shutdown();
+        ExGuild.getInstance().getApi().shutdown();
     }
 }
