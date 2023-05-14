@@ -9,8 +9,6 @@ import de.timesnake.basic.proxy.util.chat.Argument;
 import de.timesnake.basic.proxy.util.chat.Sender;
 import de.timesnake.basic.proxy.util.user.User;
 import de.timesnake.database.util.Database;
-import de.timesnake.extension.discord.wrapper.ExPrivateChannel;
-import de.timesnake.extension.discord.wrapper.ExUser;
 import de.timesnake.library.basic.util.Tuple;
 import de.timesnake.library.chat.ExTextColor;
 import de.timesnake.library.extension.util.chat.Chat;
@@ -21,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.kyori.adventure.text.Component;
@@ -28,23 +27,9 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import org.jetbrains.annotations.NotNull;
 
-public class Registration extends ListenerAdapter implements CommandListener<Sender, Argument> {
+public class RegistrationCmd extends ListenerAdapter implements CommandListener<Sender, Argument> {
 
-    public static Registration getInstance() {
-        if (instance == null) {
-            instance = new Registration();
-        }
-        return instance;
-    }
-
-    // Singleton setup /////////////////////////////
-    protected static Registration instance;
     private final HashMap<UUID, Tuple<UUID, String>> openRegistrationsByUUID = new HashMap<>();
-
-    protected Registration() {
-
-    }
-    ////////////////////////////////////////////////
 
     @Override
     public void onCommand(Sender sender, ExCommand<Sender, Argument> cmd,
@@ -135,11 +120,11 @@ public class Registration extends ListenerAdapter implements CommandListener<Sen
 
     @Override
     public void onPrivateMessageReceived(@NotNull PrivateMessageReceivedEvent event) {
-        ExPrivateChannel channel = new ExPrivateChannel(event.getChannel());
-        ExUser user = new ExUser(event.getAuthor());
+        PrivateChannel channel = event.getChannel();
+        net.dv8tion.jda.api.entities.User user = event.getAuthor();
         String message = event.getMessage().getContentRaw();
 
-        if (user.getID() == TimeSnakeGuild.getApi().getSelfUser().getIdLong()) {
+        if (user.getIdLong() == TimeSnakeGuild.getApi().getSelfUser().getIdLong()) {
             return;
         }
 
@@ -157,7 +142,7 @@ public class Registration extends ListenerAdapter implements CommandListener<Sen
         for (Tuple<UUID, String> value : openRegistrationsByUUID.values()) {
             if (value.getB().equals(providedCode)) {
                 UUID uuid = value.getA();
-                long userID = user.getID();
+                long userID = user.getIdLong();
                 Database.getUsers().getUser(uuid).setDiscordId(userID);
                 openRegistrationsByUUID.remove(uuid);
                 channel.sendMessage(
