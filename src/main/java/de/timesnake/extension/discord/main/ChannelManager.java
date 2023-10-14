@@ -10,19 +10,16 @@ import de.timesnake.channel.util.listener.ChannelListener;
 import de.timesnake.channel.util.listener.ListenerType;
 import de.timesnake.channel.util.message.ChannelDiscordMessage;
 import de.timesnake.channel.util.message.ChannelDiscordMessage.Allocation;
+import de.timesnake.channel.util.message.VoidMessage;
 import de.timesnake.library.basic.util.Loggers;
 import de.timesnake.library.basic.util.Tuple;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.VoiceChannel;
+
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 public class ChannelManager implements ChannelListener {
 
@@ -123,7 +120,7 @@ public class ChannelManager implements ChannelListener {
 
 
   @ChannelHandler(type = {ListenerType.DISCORD_DESTROY_TEAMS})
-  public void onDestroyTeamsMessage(ChannelDiscordMessage<List<String>> message) {
+  public void onDestroyTeamsMessage(ChannelDiscordMessage<LinkedList<String>> message) {
     Category category = this.checkCategory(message.getIdentifier());
     if (category == null) {
       return;
@@ -151,7 +148,7 @@ public class ChannelManager implements ChannelListener {
   }
 
   @ChannelHandler(type = ListenerType.DISCORD_DELETE_UNUSED)
-  public void onDeleteUnusedMessage(ChannelDiscordMessage<Void> msg) {
+  public void onDeleteUnusedMessage(ChannelDiscordMessage<VoidMessage> msg) {
     Category category = this.checkCategory(msg.getIdentifier());
     if (category == null) {
       return;
