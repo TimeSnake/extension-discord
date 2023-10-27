@@ -15,11 +15,13 @@ import com.velocitypowered.api.plugin.PluginManager;
 import com.velocitypowered.api.proxy.ProxyServer;
 import de.timesnake.basic.proxy.util.Network;
 import de.timesnake.extension.discord.util.ConfigFile;
-import java.util.logging.Logger;
-import javax.security.auth.login.LoginException;
+import de.timesnake.library.basic.util.Loggers;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+
+import javax.security.auth.login.LoginException;
+import java.util.logging.Logger;
 
 
 @com.velocitypowered.api.plugin.Plugin(id = "extension-discord", name = "ExDiscord", version = "1.0-SNAPSHOT",
@@ -82,8 +84,7 @@ public class ExDiscord {
     try {
       api = builder.build();
       api.awaitReady();
-    } catch (LoginException | InterruptedException e) {
-      e.printStackTrace();
+    } catch (LoginException | InterruptedException ignored) {
     }
 
     if (api != null) {
@@ -94,8 +95,7 @@ public class ExDiscord {
       api.getPresence().setPresence(Activity.watching("TimeSnake.de"), false);
 
     } else {
-      Network.printWarning(de.timesnake.extension.discord.main.Plugin.DISCORD,
-          "The api could not be initialized.");
+      Loggers.DISCORD.severe("API could not be initialized");
     }
   }
 
