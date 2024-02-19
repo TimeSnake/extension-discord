@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 
 
 @com.velocitypowered.api.plugin.Plugin(id = "extension-discord", name = "ExDiscord", version = "1.0-SNAPSHOT",
-    url = "https://git.timesnake.de", authors = {"MarkusNils"},
+    url = "https://git.timesnake.de", authors = {"timesnake"},
     dependencies = {
         @Dependency(id = "basic-proxy")
     })
