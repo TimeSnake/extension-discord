@@ -15,13 +15,13 @@ import com.velocitypowered.api.plugin.PluginManager;
 import com.velocitypowered.api.proxy.ProxyServer;
 import de.timesnake.basic.proxy.util.Network;
 import de.timesnake.extension.discord.util.ConfigFile;
-import de.timesnake.library.basic.util.Loggers;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.security.auth.login.LoginException;
-import java.util.logging.Logger;
 
 
 @com.velocitypowered.api.plugin.Plugin(id = "extension-discord", name = "ExDiscord", version = "1.0-SNAPSHOT",
@@ -33,10 +33,6 @@ public class ExDiscord {
 
   public static ExDiscord getPlugin() {
     return plugin;
-  }
-
-  public static Logger getLogger() {
-    return logger;
   }
 
   public static ProxyServer getServer() {
@@ -59,12 +55,12 @@ public class ExDiscord {
   private static RegistrationCmd registrationCmd;
   private static ExDiscord plugin;
   private static ProxyServer server;
-  private static Logger logger;
+
+  private final Logger logger = LogManager.getLogger("discord.manager");
 
   @Inject
-  public ExDiscord(ProxyServer server, Logger logger) {
+  public ExDiscord(ProxyServer server) {
     ExDiscord.server = server;
-    ExDiscord.logger = logger;
   }
 
   @Subscribe
@@ -95,7 +91,7 @@ public class ExDiscord {
       api.getPresence().setPresence(Activity.watching("TimeSnake.de"), false);
 
     } else {
-      Loggers.DISCORD.severe("API could not be initialized");
+      this.logger.error("API could not be initialized");
     }
   }
 
