@@ -11,17 +11,20 @@ import de.timesnake.channel.util.listener.ListenerType;
 import de.timesnake.channel.util.message.ChannelDiscordMessage;
 import de.timesnake.channel.util.message.ChannelDiscordMessage.Allocation;
 import de.timesnake.channel.util.message.VoidMessage;
-import de.timesnake.library.basic.util.Loggers;
 import de.timesnake.library.basic.util.Tuple;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.VoiceChannel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class ChannelManager implements ChannelListener {
+
+  private final Logger logger = LogManager.getLogger("discord.channel");
 
   private final Map<Long, Tuple<Long, CompletableFuture<Void>>> awaitingMoveByMemberId = new HashMap<>();
   private final Map<String, Tuple<String, CompletableFuture<VoiceChannel>>> awaitingChannelCreation = new HashMap<>();
@@ -37,14 +40,13 @@ public class ChannelManager implements ChannelListener {
         false);
     Category category;
 
-    if (categories.size() == 0) {
+    if (categories.isEmpty()) {
       category = TimeSnakeGuild.createCategory(message.getIdentifier()).complete();
     } else {
       category = categories.get(0);
     }
 
-    Map<String, ? extends Collection<UUID>> userAllocationByTeam = message.getValue()
-        .getAllocation();
+    Map<String, ? extends Collection<UUID>> userAllocationByTeam = message.getValue().getAllocation();
 
     for (Map.Entry<String, ? extends Collection<UUID>> entry : userAllocationByTeam.entrySet()) {
       String teamName = entry.getKey();
@@ -53,7 +55,7 @@ public class ChannelManager implements ChannelListener {
 
       List<VoiceChannel> voiceChannels = category.getVoiceChannels().stream().filter(v ->
           v.getName().equals(teamName)).toList();
-      if (voiceChannels.size() == 0) {
+      if (voiceChannels.isEmpty()) {
         voiceChannel = this.createVoiceChannel(category, teamName);
       } else {
         voiceChannel = CompletableFuture.completedFuture(voiceChannels.get(0));
@@ -71,8 +73,8 @@ public class ChannelManager implements ChannelListener {
       );
 
       if (!uuids.isEmpty()) {
-        Loggers.DISCORD.info("Moved members to '" + teamName + "': '"
-            + String.join("', '", uuids.stream().map(UUID::toString).toList()));
+        this.logger.info("Moved members to '{}': '{}'", teamName,
+            String.join("', '", uuids.stream().map(UUID::toString).toList()));
       }
     }
   }
@@ -135,15 +137,14 @@ public class ChannelManager implements ChannelListener {
                   .whenCompleteAsync((v, t) -> voiceChannel.delete().submit()))
               .toArray(CompletableFuture[]::new))
           .whenCompleteAsync((v, t) -> category.delete().submit());
-      Loggers.DISCORD.info("Deleted category '" + category.getName() + "'");
+      this.logger.info("Deleted category '{}'", category.getName());
     } else {
       category.getVoiceChannels().stream()
           .filter(v -> teamNames.contains(v.getName()))
           .forEach(voiceChannel -> this.moveVoiceMembers(voiceChannel.getMembers(),
                   TimeSnakeGuild.getFallbackChannel())
               .whenCompleteAsync((v, t) -> voiceChannel.delete().submit()));
-      Loggers.DISCORD.info("Deleted channels '" + String.join("' , '", teamNames)
-          + "' in category '" + category.getName() + "'");
+      this.logger.info("Deleted channels '{}' in category '{}'", String.join("' , '", teamNames), category.getName());
     }
   }
 
@@ -155,13 +156,12 @@ public class ChannelManager implements ChannelListener {
     }
 
     category.getVoiceChannels().stream()
-        .filter(vc -> vc.getMembers().size() == 0)
+        .filter(vc -> vc.getMembers().isEmpty())
         .forEach(voiceChannel -> this.moveVoiceMembers(voiceChannel.getMembers(),
                 TimeSnakeGuild.getFallbackChannel())
             .whenCompleteAsync((v, t) -> {
               voiceChannel.delete().submit();
-              Loggers.DISCORD.info("Deleted unused channel in category '"
-                  + voiceChannel.getName() + "'");
+              this.logger.info("Deleted unused channel in category '{}'", voiceChannel.getName());
             }));
   }
 
@@ -182,7 +182,7 @@ public class ChannelManager implements ChannelListener {
           .setAllow(Permission.VIEW_CHANNEL).submit();
     }
 
-    Loggers.DISCORD.info("Hide channels in category '" + category.getName() + "'");
+    this.logger.info("Hide channels in category '{}'", category.getName());
   }
 
   @ChannelHandler(type = ListenerType.DISCORD_MUTE_CHANNEL)
@@ -202,8 +202,7 @@ public class ChannelManager implements ChannelListener {
     channels.get(0).createPermissionOverride(category.getGuild().getPublicRole())
         .setDeny(Permission.VOICE_SPEAK).submit();
 
-    Loggers.DISCORD.info("Mute channel '" + channels.get(0).getName() + "' in category '"
-        + category.getName() + "'");
+    this.logger.info("Mute channel '{}' in category '{}'", channels.get(0).getName(), category.getName());
   }
 
   @ChannelHandler(type = ListenerType.DISCORD_DISCONNECT_MEMBER)
@@ -219,12 +218,12 @@ public class ChannelManager implements ChannelListener {
     }
 
     TimeSnakeGuild.moveVoiceMember(member, null);
-    Loggers.DISCORD.info("Disconnected member '" + msg.getValue().toString() + "'");
+    this.logger.info("Disconnected member '{}'", msg.getValue().toString());
   }
 
   private Category checkCategory(String name) {
     List<Category> categories = TimeSnakeGuild.getCategoriesByName(name, false);
-    if (categories.size() == 0) {
+    if (categories.isEmpty()) {
       return null;
     } else {
       return categories.get(0);
