@@ -1,5 +1,5 @@
 main: de.timesnake.extension.discord.main.ExDiscord
-version: 1.4.0
+version: 1.4.1
 name: extension-discord
 author: Jonas
 depends: [ basic-proxy ]
