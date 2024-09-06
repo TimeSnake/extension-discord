@@ -43,8 +43,8 @@ dependencies {
     compileOnly("de.timesnake:library-basic:2.+")
     compileOnly("de.timesnake:library-chat:2.+")
 
-    compileOnly("com.velocitypowered:velocity-api:3.1.1")
-    annotationProcessor("com.velocitypowered:velocity-api:3.1.1")
+    compileOnly("com.velocitypowered:velocity-api:3.3.0-SNAPSHOT")
+    annotationProcessor("com.velocitypowered:velocity-api:3.3.0-SNAPSHOT")
 
     compileOnly("org.apache.logging.log4j:log4j-api:2.22.1")
     compileOnly("org.apache.logging.log4j:log4j-core:2.22.1")
