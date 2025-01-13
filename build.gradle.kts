@@ -32,8 +32,8 @@ dependencies {
 
     compileOnly("de.timesnake:basic-proxy:2.+")
 
-    compileOnly("de.timesnake:database-proxy:3.+")
-    compileOnly("de.timesnake:database-api:3.+")
+    compileOnly("de.timesnake:database-proxy:4.+")
+    compileOnly("de.timesnake:database-api:4.+")
 
     compileOnly("de.timesnake:channel-proxy:5.+")
     compileOnly("de.timesnake:channel-api:5.+")
