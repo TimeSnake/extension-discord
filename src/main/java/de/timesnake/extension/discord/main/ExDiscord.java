@@ -15,6 +15,7 @@ import com.velocitypowered.api.plugin.PluginManager;
 import com.velocitypowered.api.proxy.ProxyServer;
 import de.timesnake.basic.proxy.util.Network;
 import de.timesnake.extension.discord.util.ConfigFile;
+import de.timesnake.library.chat.Plugin;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -30,6 +31,8 @@ import javax.security.auth.login.LoginException;
         @Dependency(id = "basic-proxy")
     })
 public class ExDiscord {
+
+  public static final Plugin PLUGIN = new Plugin("Discord", "XDC");
 
   public static ExDiscord getPlugin() {
     return plugin;
@@ -69,8 +72,7 @@ public class ExDiscord {
 
     registrationCmd = new RegistrationCmd();
 
-    Network.getCommandManager().addCommand(this, "discord", registrationCmd,
-        de.timesnake.extension.discord.main.Plugin.DISCORD);
+    Network.getCommandManager().addCommand(this, "discord", registrationCmd, PLUGIN);
 
     new ChannelManager();
 

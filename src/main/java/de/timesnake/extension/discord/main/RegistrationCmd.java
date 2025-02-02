@@ -14,6 +14,7 @@ import de.timesnake.database.util.Database;
 import de.timesnake.library.basic.util.Tuple;
 import de.timesnake.library.chat.Chat;
 import de.timesnake.library.chat.ExTextColor;
+import de.timesnake.library.chat.Plugin;
 import de.timesnake.library.commands.PluginCommand;
 import de.timesnake.library.commands.simple.Arguments;
 import net.dv8tion.jda.api.entities.PrivateChannel;
@@ -47,7 +48,7 @@ public class RegistrationCmd extends ListenerAdapter implements CommandListener 
     // Discord information
     if (args.length() == 0) {
 
-      Component component = Chat.getSenderPlugin(Plugin.DISCORD)
+      Component component = Chat.getSenderPlugin(Plugin.SERVER)
           .append(Component.text("Join our discord: ", ExTextColor.PUBLIC))
           .append(Component.text("https://discord.gg/YRCZhFVE9z", ExTextColor.VALUE))
           .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT, Component.text("Click to open link")))
@@ -85,7 +86,7 @@ public class RegistrationCmd extends ListenerAdapter implements CommandListener 
           openRegistrationsByUUID.put(user.getUniqueId(), new Tuple<>(user.getUniqueId(), code));
         }
 
-        Component component = Chat.getSenderPlugin(Plugin.DISCORD)
+        Component component = Chat.getSenderPlugin(Plugin.SERVER)
             .append(Component.text("Please send the following ", ExTextColor.PERSONAL))
             .append(Component.text("code via private message to our bot: ",
                 ExTextColor.PERSONAL))
