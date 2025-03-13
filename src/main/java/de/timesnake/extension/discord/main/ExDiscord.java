@@ -19,10 +19,9 @@ import de.timesnake.library.chat.Plugin;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import javax.security.auth.login.LoginException;
 
 
 @com.velocitypowered.api.plugin.Plugin(id = "extension-discord", name = "ExDiscord", version = "1.0-SNAPSHOT",
@@ -82,7 +81,7 @@ public class ExDiscord {
     try {
       api = builder.build();
       api.awaitReady();
-    } catch (LoginException | InterruptedException ignored) {
+    } catch (InvalidTokenException | IllegalArgumentException | InterruptedException ignored) {
     }
 
     if (api != null) {

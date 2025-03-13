@@ -13,9 +13,9 @@ import de.timesnake.channel.util.message.ChannelDiscordMessage.Allocation;
 import de.timesnake.channel.util.message.VoidMessage;
 import de.timesnake.library.basic.util.Tuple;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.VoiceChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.Category;
+import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -64,7 +64,7 @@ public class ChannelManager implements ChannelListener {
       voiceChannel.whenCompleteAsync((v, t) -> {
             for (UUID uuid : uuids) {
               Member member = TimeSnakeGuild.getMemberByUuid(uuid);
-              if (member != null && member.getVoiceState().inVoiceChannel()
+              if (member != null && member.getVoiceState().inAudioChannel()
                   && !member.getVoiceState().getChannel().equals(v)) {
                 this.moveVoiceMember(member, v);
               }
@@ -174,12 +174,12 @@ public class ChannelManager implements ChannelListener {
 
     if (msg.getValue()) {
       category.getVoiceChannels().get(0)
-          .createPermissionOverride(category.getGuild().getPublicRole())
-          .setDeny(Permission.VIEW_CHANNEL).submit();
+          .upsertPermissionOverride(category.getGuild().getPublicRole())
+          .deny(Permission.VIEW_CHANNEL).submit();
     } else {
       category.getVoiceChannels().get(0)
-          .createPermissionOverride(category.getGuild().getPublicRole())
-          .setAllow(Permission.VIEW_CHANNEL).submit();
+          .upsertPermissionOverride(category.getGuild().getPublicRole())
+          .setAllowed(Permission.VIEW_CHANNEL).submit();
     }
 
     this.logger.info("Hide channels in category '{}'", category.getName());
@@ -199,8 +199,8 @@ public class ChannelManager implements ChannelListener {
       return;
     }
 
-    channels.get(0).createPermissionOverride(category.getGuild().getPublicRole())
-        .setDeny(Permission.VOICE_SPEAK).submit();
+    channels.get(0).upsertPermissionOverride(category.getGuild().getPublicRole())
+        .deny(Permission.VOICE_SPEAK).submit();
 
     this.logger.info("Mute channel '{}' in category '{}'", channels.get(0).getName(), category.getName());
   }

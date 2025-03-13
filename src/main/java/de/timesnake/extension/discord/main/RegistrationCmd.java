@@ -17,8 +17,8 @@ import de.timesnake.library.chat.ExTextColor;
 import de.timesnake.library.chat.Plugin;
 import de.timesnake.library.commands.PluginCommand;
 import de.timesnake.library.commands.simple.Arguments;
-import net.dv8tion.jda.api.entities.PrivateChannel;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -117,8 +117,11 @@ public class RegistrationCmd extends ListenerAdapter implements CommandListener 
   }
 
   @Override
-  public void onPrivateMessageReceived(@NotNull PrivateMessageReceivedEvent event) {
-    PrivateChannel channel = event.getChannel();
+  public void onMessageReceived(@NotNull MessageReceivedEvent event) {
+    if (!(event.getChannel() instanceof PrivateChannel channel)) {
+      return;
+    }
+
     net.dv8tion.jda.api.entities.User user = event.getAuthor();
     String message = event.getMessage().getContentRaw();
 
@@ -132,7 +135,7 @@ public class RegistrationCmd extends ListenerAdapter implements CommandListener 
     } catch (NumberFormatException e) {
       channel.sendMessage(
           "Your message does not have the format of a registration id.\nPlease use the command "
-              + "\"/discord login\" and copy the code by clicking on it.").complete();
+          + "\"/discord login\" and copy the code by clicking on it.").complete();
       return;
     }
 
@@ -143,14 +146,14 @@ public class RegistrationCmd extends ListenerAdapter implements CommandListener 
         Database.getUsers().getUser(uuid).setDiscordId(userID);
         openRegistrationsByUUID.remove(uuid);
         channel.sendMessage("Your discord account has been successfully linked to your Minecraft account ("
-            + Database.getUsers().getUser(uuid).getName() + ")!").complete();
+                            + Database.getUsers().getUser(uuid).getName() + ")!").complete();
         return;
       }
     }
 
     // Code not found
     channel.sendMessage("The entered code does not exist. Please use the command \"/discord login\" and follow "
-        + "the instructions.").complete();
+                        + "the instructions.").complete();
 
   }
 
